@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	postgres "cli-task-manager/db"
+	"encoding/binary"
 	"fmt"
 
+	"github.com/boltdb/bolt"
 	"github.com/spf13/cobra"
 )
 
@@ -13,29 +14,28 @@ var listCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  `A o quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		db, err := postgres.ConnectToDatabase()
+		fmt.Printf("This is your tasks:\n")
+
+		db, err := bolt.Open("task-manager.db", 0644, nil)
 		if err != nil {
 			panic(err)
 		}
 		defer db.Close()
 
-		rows, err := db.Query(`SELECT * FROM tasks`)
-		if err != nil {
-			panic(err)
-		}
+		err = db.View(func(tx *bolt.Tx) error {
+			bucket := tx.Bucket([]byte("tasks"))
+			cursor := bucket.Cursor()
 
-		for rows.Next() {
-			var id int
-			var name string
-			var done bool
-			var createdAt string
-
-			err := rows.Scan(&id, &name, &done, &createdAt)
-			if err != nil {
-				panic(err)
+			for key, value := cursor.First(); key != nil; key, value = cursor.Next() {
+				id := binary.BigEndian.Uint64(key)
+				fmt.Printf("%d. %s\n", id, value)
 			}
 
-			fmt.Printf("%d. %s \n", id, name)
+			return nil
+		})
+
+		if err != nil {
+			panic(err)
 		}
 	},
 }

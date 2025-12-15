@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	postgres "cli-task-manager/db"
+	"encoding/binary"
 	"fmt"
-	"strings"
-
+	"github.com/boltdb/bolt"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 // addCmd represents the add command
@@ -19,20 +19,36 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		db, err := postgres.ConnectToDatabase()
+		db, err := bolt.Open("task-manager.db", 0644, nil)
 		if err != nil {
 			panic(err)
 		}
 		defer db.Close()
 
-		sqlQuery := `
-		INSERT INTO tasks (title)
-		VALUES ($1)
-		`
-		//interpriting arguments into 1 string
-		task := strings.Join(args, " ")
+		err = db.Update(func(tx *bolt.Tx) error {
+			bucket, err := tx.CreateBucketIfNotExists([]byte("tasks"))
+			if err != nil {
+				panic(err)
+			}
 
-		_, err = db.Exec(sqlQuery, task)
+			id, err := bucket.NextSequence()
+			if err != nil {
+				panic(err)
+			}
+
+			idBytes := make([]byte, 8)
+			binary.BigEndian.PutUint64(idBytes, id)
+
+			todoTask := []byte(strings.Join(args, " "))
+
+			err = bucket.Put(idBytes, todoTask)
+			if err != nil {
+				panic(err)
+			}
+
+			return nil
+		})
+
 		if err != nil {
 			panic(err)
 		}

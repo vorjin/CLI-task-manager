@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	postgres "cli-task-manager/db"
 	"fmt"
-
+	"github.com/boltdb/bolt"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 // doCmd represents the do command
@@ -13,29 +13,28 @@ var doCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  `A longer description`,
 	Run: func(cmd *cobra.Command, args []string) {
-		db, err := postgres.ConnectToDatabase()
+		db, err := bolt.Open("task-manager.db", 0644, nil)
 		if err != nil {
 			panic(err)
 		}
 		defer db.Close()
 
-		sqlInsertQuery := `
-		INSERT INTO completed_tasks(title)
-		SELECT title
-		FROM tasks
-		WHERE id=$1;
-		`
-		sqlDeleteQuery := `
-		DELETE FROM tasks
-		WHERE id=$1;
-		`
+		err = db.Update(func(tx *bolt.Tx) error {
+			bucket, err := tx.CreateBucketIfNotExists([]byte("tasks"))
+			if err != nil {
+				panic(err)
+			}
 
-		_, err = db.Exec(sqlInsertQuery, args[0])
-		if err != nil {
-			panic(err)
-		}
+			doTask := []byte(strings.Join(args, " "))
 
-		_, err = db.Exec(sqlDeleteQuery, args[0])
+			err = bucket.Delete(doTask)
+			if err != nil {
+				panic(err)
+			}
+
+			return nil
+		})
+
 		if err != nil {
 			panic(err)
 		}
