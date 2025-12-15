@@ -11,8 +11,8 @@ import (
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "A brief description of your command",
-	Long:  `A o quickly create a Cobra application.`,
+	Short: "List all of your incomplete tasks",
+	Long:  `List all of your incomplete tasks currently stored in the database.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("This is your tasks:\n")
 

@@ -1,17 +1,19 @@
 package cmd
 
 import (
+	"encoding/binary"
 	"fmt"
+	"strconv"
+
 	"github.com/boltdb/bolt"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 // doCmd represents the do command
 var doCmd = &cobra.Command{
-	Use:   "do",
-	Short: "A brief description of your command",
-	Long:  `A longer description`,
+	Use:   "do [task number]",
+	Short: "Mark a task as complete",
+	Long:  `Mark a task as complete by providing its number from the list.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		db, err := bolt.Open("task-manager.db", 0644, nil)
 		if err != nil {
@@ -20,14 +22,21 @@ var doCmd = &cobra.Command{
 		defer db.Close()
 
 		err = db.Update(func(tx *bolt.Tx) error {
-			bucket, err := tx.CreateBucketIfNotExists([]byte("tasks"))
+			bucket := tx.Bucket([]byte("tasks"))
+			if bucket == nil {
+				fmt.Println("bucket not found")
+				return nil
+			}
+
+			id, err := strconv.ParseUint(args[0], 10, 64)
 			if err != nil {
 				panic(err)
 			}
 
-			doTask := []byte(strings.Join(args, " "))
+			idBytes := make([]byte, 8)
+			binary.BigEndian.PutUint64(idBytes, id)
 
-			err = bucket.Delete(doTask)
+			err = bucket.Delete(idBytes)
 			if err != nil {
 				panic(err)
 			}

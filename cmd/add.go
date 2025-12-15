@@ -10,14 +10,9 @@ import (
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
-	Use:   "add",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "add [task description]",
+	Short: "Add a new task to your list",
+	Long:  `Add a new task to your list. The task description can be a single word or a sentence.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		db, err := bolt.Open("task-manager.db", 0644, nil)
 		if err != nil {

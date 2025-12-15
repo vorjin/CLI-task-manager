@@ -9,9 +9,10 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "task is a CLI task-manager",
-	Short: "task is a CLI task-manager",
-	Long:  `task is a CLI task-manager`,
+	Use:   "task",
+	Short: "task is a CLI for managing your TODOs.",
+	Long: `task is a CLI for managing your TODOs.
+It allows you to add, list, and mark tasks as complete.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
