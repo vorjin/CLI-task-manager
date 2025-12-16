@@ -1,4 +1,4 @@
-module cli-task-manager
+module stask
 
 go 1.25.1
 
