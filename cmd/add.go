@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"stask/db"
 	"strings"
@@ -21,7 +21,7 @@ var addCmd = &cobra.Command{
 			panic(err)
 		}
 
-		fmt.Println("Task was added succesfully.")
+		color.Green("Task was added succesfully.")
 	},
 }
 

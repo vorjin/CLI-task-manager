@@ -26,8 +26,6 @@ func BoltDBInit(path string) error {
 }
 
 func ListTasks() error {
-	fmt.Printf("This is your tasks:\n")
-
 	return db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(bucketPath)
 
@@ -86,4 +84,3 @@ func uToB(id uint64) []byte {
 	binary.BigEndian.PutUint64(idBytes, id)
 	return idBytes
 }
-

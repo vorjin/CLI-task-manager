@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"stask/db"
 )
@@ -11,6 +12,8 @@ var listCmd = &cobra.Command{
 	Short: "List all of your incomplete tasks",
 	Long:  `List all of your incomplete tasks currently stored in the database.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		color.Magenta("This is your tasks: \n")
+
 		err := db.ListTasks()
 		if err != nil {
 			panic(err)

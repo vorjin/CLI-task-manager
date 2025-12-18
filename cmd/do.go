@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"stask/db"
 	"strconv"
@@ -24,7 +24,7 @@ var doCmd = &cobra.Command{
 			panic(err)
 		}
 
-		fmt.Println("Task was marked as done!")
+		color.Green("Task was marked as done!")
 	},
 }
 
