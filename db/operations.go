@@ -11,6 +11,7 @@ import (
 var db *bolt.DB
 var tasksBucket = []byte("tasks")
 var completedBucket = []byte("completed")
+var completedTimeBucket = []byte("completed_time")
 
 func BoltDBInit(path string) error {
 	var err error
@@ -25,7 +26,12 @@ func BoltDBInit(path string) error {
 		if err != nil {
 			return err
 		}
+
 		_, err = tx.CreateBucketIfNotExists(completedBucket)
+		if err != nil {
+			return err
+		}
+		_, err = tx.CreateBucketIfNotExists(completedTimeBucket)
 		return err
 	})
 }
@@ -88,7 +94,7 @@ func TaskByID(id uint64) ([]byte, error) {
 	return taskDesc, nil
 }
 
-func DoTask(id uint64) error {
+func DeleteTask(id uint64) error {
 	return db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(tasksBucket)
 

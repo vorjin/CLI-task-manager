@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"stask/db"
 	"strconv"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -32,7 +33,14 @@ var doCmd = &cobra.Command{
 				panic(err)
 			}
 
-			err = db.DoTask(id)
+			timeNow := []byte(time.Now().Format(time.RFC3339))
+
+			err = db.AddTask(timeNow, "completed_time")
+			if err != nil {
+				panic(err)
+			}
+
+			err = db.DeleteTask(id)
 
 			if err != nil {
 				panic(err)
