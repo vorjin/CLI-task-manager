@@ -30,9 +30,11 @@ func BoltDBInit(path string) error {
 	})
 }
 
-func ListTasks() error {
+func ListTasks(bucketName string) error {
+	bucketBytes := []byte(bucketName)
+
 	return db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket(tasksBucket)
+		bucket := tx.Bucket(bucketBytes)
 
 		cursor := bucket.Cursor()
 

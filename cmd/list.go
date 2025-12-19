@@ -14,7 +14,7 @@ var listCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		color.Magenta("This is your tasks: \n")
 
-		err := db.ListTasks()
+		err := db.ListTasks("tasks")
 		if err != nil {
 			panic(err)
 		}
