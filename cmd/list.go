@@ -12,7 +12,7 @@ var listCmd = &cobra.Command{
 	Short: "List all of your incomplete tasks",
 	Long:  `List all of your incomplete tasks currently stored in the database.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		color.Magenta("This is your tasks: \n")
+		color.Magenta("This are your tasks: \n")
 
 		err := db.ListTasks("tasks")
 		if err != nil {

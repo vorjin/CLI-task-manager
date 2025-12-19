@@ -12,7 +12,7 @@ var completedCmd = &cobra.Command{
 	Short: "show completed tasks",
 	Long:  "show completed tasks",
 	Run: func(cmd *cobra.Command, args []string) {
-		color.Cyan("This is your completed tasks: \n")
+		color.Cyan("This are your completed tasks: \n")
 
 		err := db.ListTasks("completed")
 		if err != nil {
