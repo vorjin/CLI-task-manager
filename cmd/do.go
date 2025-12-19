@@ -22,6 +22,12 @@ var doCmd = &cobra.Command{
 				panic(err)
 			}
 
+			taskDesc, err := db.TaskByID(id)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Printf("%s", string(taskDesc))
+
 			err = db.DoTask(id)
 
 			if err != nil {

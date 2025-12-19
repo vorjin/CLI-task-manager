@@ -9,7 +9,8 @@ import (
 )
 
 var db *bolt.DB
-var bucketPath = []byte("tasks")
+var tasksBucket = []byte("tasks")
+var completedBucket = []byte("completed")
 
 func BoltDBInit(path string) error {
 	var err error
@@ -20,14 +21,18 @@ func BoltDBInit(path string) error {
 	}
 
 	return db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists(bucketPath)
+		_, err := tx.CreateBucketIfNotExists(tasksBucket)
+		if err != nil {
+			return err
+		}
+		_, err = tx.CreateBucketIfNotExists(completedBucket)
 		return err
 	})
 }
 
 func ListTasks() error {
 	return db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket(bucketPath)
+		bucket := tx.Bucket(tasksBucket)
 
 		cursor := bucket.Cursor()
 
@@ -40,9 +45,11 @@ func ListTasks() error {
 	})
 }
 
-func AddTask(task []byte) error {
+func AddTask(task []byte, bucketName string) error {
+	bucketBytes := []byte(bucketName)
+
 	return db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket(bucketPath)
+		bucket := tx.Bucket(bucketBytes)
 
 		id, err := bucket.NextSequence()
 		if err != nil {
@@ -60,9 +67,28 @@ func AddTask(task []byte) error {
 	})
 }
 
+func TaskByID(id uint64) ([]byte, error) {
+	var taskDesc []byte
+
+	err := db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(tasksBucket)
+
+		idBytes := uToB(id)
+
+		taskDesc = bucket.Get(idBytes)
+		return nil
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	return taskDesc, nil
+}
+
 func DoTask(id uint64) error {
 	return db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket(bucketPath)
+		bucket := tx.Bucket(tasksBucket)
 
 		idBytes := uToB(id)
 
