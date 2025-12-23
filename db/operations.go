@@ -2,10 +2,12 @@
 package db
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/boltdb/bolt"
 	"time"
+
+	"github.com/boltdb/bolt"
 )
 
 var db *bolt.DB
@@ -36,8 +38,8 @@ func BoltDBInit(path string) error {
 	})
 }
 
-func ListTasks(bucketName string) error {
-	bucketBytes := []byte(bucketName)
+func ListToDoTasks() error {
+	bucketBytes := []byte("tasks")
 
 	return db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(bucketBytes)
@@ -45,8 +47,38 @@ func ListTasks(bucketName string) error {
 		cursor := bucket.Cursor()
 
 		for key, value := cursor.First(); key != nil; key, value = cursor.Next() {
-			id := bToU(key)
-			fmt.Printf("%d. %s\n", id, value)
+			if value != nil {
+				id := bToU(key)
+				fmt.Printf("%d. %s\n", id, value)
+			}
+		}
+
+		return nil
+	})
+}
+
+func ListCompletedTasks(hours int) error {
+	// calculating cutoff point
+	duration := time.Duration(hours) * time.Hour
+	cutoff := time.Now().Add(-duration).Format(time.RFC3339)
+	cutoffBytes := []byte(cutoff)
+
+	return db.View(func(tx *bolt.Tx) error {
+		timeBucket := tx.Bucket([]byte("completed_time"))
+		dataBucket := tx.Bucket([]byte("completed"))
+
+		timeCursor := timeBucket.Cursor()
+
+		for key, timeValue := timeCursor.Last(); key != nil; key, timeValue = timeCursor.Prev() {
+			if bytes.Compare(timeValue, cutoffBytes) < 0 {
+				break
+			}
+
+			taskBytes := dataBucket.Get(key)
+			if taskBytes != nil {
+				id := bToU(key)
+				fmt.Printf("%d. %s\n", id, taskBytes)
+			}
 		}
 
 		return nil
