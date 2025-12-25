@@ -20,14 +20,18 @@ var completedCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		color.Cyan("This are your completed tasks for the last %d hours: \n", hours)
-
 		tasks, err := db.ListCompletedTasks(hours)
 		if err != nil {
 			fmt.Printf("Error getting completed tasks. Err: %v", err)
 			os.Exit(1)
 		}
 
+		if len(tasks) == 0 {
+			color.Red("There are no completed tasks! Maaaan, time to do something..\n")
+			return
+		}
+
+		color.Cyan("This are your completed tasks for the last %d hours: \n", hours)
 		for i, task := range tasks {
 			fmt.Printf("%d. %s\n", i+1, task.Task)
 		}
