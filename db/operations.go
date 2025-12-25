@@ -188,6 +188,10 @@ func DoTask(args []string) ([]string, error) {
 	return tasks, nil
 }
 
+func CloseBoltDB() error {
+	return db.Close()
+}
+
 func bToU(key []byte) uint64 {
 	return binary.BigEndian.Uint64(key)
 }

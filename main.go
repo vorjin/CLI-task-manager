@@ -22,4 +22,9 @@ func main() {
 		panic(err)
 	}
 	cmd.Execute()
+
+	err = db.CloseBoltDB()
+	if err != nil {
+		panic(err)
+	}
 }
