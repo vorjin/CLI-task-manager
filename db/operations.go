@@ -24,7 +24,7 @@ func BoltDBInit(path string) error {
 
 	db, err = bolt.Open(path, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return db.Update(func(tx *bolt.Tx) error {
@@ -106,7 +106,7 @@ func ListCompletedTasks(hours int) ([]Task, error) {
 	return tasks, err
 }
 
-func AddToDOTask(task []byte) error {
+func AddToDoTask(task []byte) error {
 	return AddTask(task, "tasks")
 }
 
@@ -118,14 +118,14 @@ func AddTask(task []byte, bucketName string) error {
 
 		id, err := bucket.NextSequence()
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		idBytes := uToB(id)
 
 		err = bucket.Put(idBytes, task)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		return nil
@@ -145,7 +145,7 @@ func TaskByID(id uint64) ([]byte, error) {
 	})
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return taskDesc, nil
@@ -159,7 +159,7 @@ func DeleteTask(id uint64) error {
 
 		err := bucket.Delete(idBytes)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		return nil
@@ -178,30 +178,30 @@ func DoTask(args []string) ([]string, error) {
 	for _, taskID := range args {
 		id, err := strconv.ParseUint(taskID, 10, 64)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		taskDesc, err := TaskByID(id)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		err = AddTask(taskDesc, "completed")
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		timeNow := []byte(time.Now().Format(time.RFC3339))
 
 		err = AddTask(timeNow, "completed_time")
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		err = DeleteTask(id)
 
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		tasks = append(tasks, taskID)

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"stask/db"
 
 	"github.com/fatih/color"
@@ -18,7 +19,8 @@ var listCmd = &cobra.Command{
 
 		tasks, err := db.ListToDoTasks()
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error listing TODO tasks. Err: %v", err)
+			os.Exit(1)
 		}
 
 		for _, task := range tasks {

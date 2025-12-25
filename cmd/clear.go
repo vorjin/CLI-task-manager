@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+	"stask/db"
+
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"stask/db"
 )
 
 // clearCmd represents the clear command
@@ -13,7 +16,8 @@ var clearCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		err := db.DeleteTasksBucket()
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error clearing TODO list. Err: %v", err)
+			os.Exit(1)
 		}
 
 		color.Green("TODO list was succesfully cleared!")

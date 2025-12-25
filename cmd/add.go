@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"os"
 	"stask/db"
 	"strings"
 )
@@ -15,10 +17,11 @@ var addCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		todoTask := []byte(strings.Join(args, " "))
 
-		err := db.AddToDOTask(todoTask)
+		err := db.AddToDoTask(todoTask)
 
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error adding new task. Err: %v", err)
+			os.Exit(1)
 		}
 
 		color.Green("Task was added succesfully.")

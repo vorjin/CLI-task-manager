@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"os"
 	"stask/db"
 )
 
@@ -15,19 +16,20 @@ var completedCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		hours, err := cmd.Flags().GetInt("time")
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error parsing time flag. Err: %v", err)
+			os.Exit(1)
 		}
 
 		color.Cyan("This are your completed tasks for the last %d hours: \n", hours)
 
 		tasks, err := db.ListCompletedTasks(hours)
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error getting completed tasks. Err: %v", err)
+			os.Exit(1)
 		}
 
 		for i, task := range tasks {
 			fmt.Printf("%d. %s\n", i+1, task.Task)
-			i++
 		}
 	},
 }

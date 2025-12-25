@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"os"
 	"stask/db"
 )
 
@@ -15,7 +17,8 @@ var doCmd = &cobra.Command{
 		tasks, err := db.DoTask(args)
 
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error marking task(s) as 'Done'. Err: %v", err)
+			os.Exit(1)
 		}
 
 		for _, taskID := range tasks {
