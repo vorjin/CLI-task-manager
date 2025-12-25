@@ -16,6 +16,11 @@ var tasksBucket = []byte("tasks")
 var completedBucket = []byte("completed")
 var completedTimeBucket = []byte("completed_time")
 
+type Task struct {
+	ID   uint64
+	Task string
+}
+
 func BoltDBInit(path string) error {
 	var err error
 
@@ -39,10 +44,11 @@ func BoltDBInit(path string) error {
 	})
 }
 
-func ListToDoTasks() error {
+func ListToDoTasks() ([]Task, error) {
 	bucketBytes := []byte("tasks")
+	var tasks []Task
 
-	return db.View(func(tx *bolt.Tx) error {
+	err := db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(bucketBytes)
 
 		cursor := bucket.Cursor()
@@ -50,12 +56,19 @@ func ListToDoTasks() error {
 		for key, value := cursor.First(); key != nil; key, value = cursor.Next() {
 			if value != nil {
 				id := bToU(key)
-				fmt.Printf("%d. %s\n", id, value)
+
+				var task Task
+				task.ID = id
+				task.Task = string(value)
+
+				tasks = append(tasks, task)
 			}
 		}
 
 		return nil
 	})
+
+	return tasks, err
 }
 
 func ListCompletedTasks(hours int) error {

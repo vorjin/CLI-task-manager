@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"fmt"
+	"stask/db"
+
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"stask/db"
 )
 
 // listCmd represents the list command
@@ -14,9 +16,13 @@ var listCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		color.Magenta("This are your tasks: \n")
 
-		err := db.ListToDoTasks()
+		tasks, err := db.ListToDoTasks()
 		if err != nil {
 			panic(err)
+		}
+
+		for _, task := range tasks {
+			fmt.Printf("%d. %s\n", task.ID, task.Task)
 		}
 	},
 }
