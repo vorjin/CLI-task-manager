@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -147,6 +148,44 @@ func DeleteTasksBucket() error {
 	return db.Update(func(tx *bolt.Tx) error {
 		return tx.DeleteBucket(tasksBucket)
 	})
+}
+
+func DoTask(args []string) ([]string, error) {
+	var tasks []string
+
+	for _, taskID := range args {
+		id, err := strconv.ParseUint(taskID, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+
+		taskDesc, err := TaskByID(id)
+		if err != nil {
+			panic(err)
+		}
+
+		err = AddTask(taskDesc, "completed")
+		if err != nil {
+			panic(err)
+		}
+
+		timeNow := []byte(time.Now().Format(time.RFC3339))
+
+		err = AddTask(timeNow, "completed_time")
+		if err != nil {
+			panic(err)
+		}
+
+		err = DeleteTask(id)
+
+		if err != nil {
+			panic(err)
+		}
+
+		tasks = append(tasks, taskID)
+	}
+
+	return tasks, nil
 }
 
 func bToU(key []byte) uint64 {
