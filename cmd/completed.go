@@ -2,10 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"stask/db"
-
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"stask/db"
 )
 
 // completedCmd represents the completed command
@@ -19,13 +18,16 @@ var completedCmd = &cobra.Command{
 			panic(err)
 		}
 
-		color.Set(color.FgCyan)
-		fmt.Printf("This are your completed tasks for the last %d hours: \n", hours)
-		color.Unset()
+		color.Cyan("This are your completed tasks for the last %d hours: \n", hours)
 
-		err = db.ListCompletedTasks(hours)
+		tasks, err := db.ListCompletedTasks(hours)
 		if err != nil {
 			panic(err)
+		}
+
+		for i, task := range tasks {
+			fmt.Printf("%d. %s\n", i+1, task.Task)
+			i++
 		}
 	},
 }

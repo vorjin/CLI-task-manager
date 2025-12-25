@@ -4,11 +4,9 @@ package db
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
+	"github.com/boltdb/bolt"
 	"strconv"
 	"time"
-
-	"github.com/boltdb/bolt"
 )
 
 var db *bolt.DB
@@ -71,19 +69,20 @@ func ListToDoTasks() ([]Task, error) {
 	return tasks, err
 }
 
-func ListCompletedTasks(hours int) error {
+func ListCompletedTasks(hours int) ([]Task, error) {
+	var tasks []Task
+
 	// calculating cutoff point
 	duration := time.Duration(hours) * time.Hour
 	cutoff := time.Now().Add(-duration).Format(time.RFC3339)
 	cutoffBytes := []byte(cutoff)
 
-	return db.View(func(tx *bolt.Tx) error {
+	err := db.View(func(tx *bolt.Tx) error {
 		timeBucket := tx.Bucket([]byte("completed_time"))
 		dataBucket := tx.Bucket([]byte("completed"))
 
 		timeCursor := timeBucket.Cursor()
 
-		i := 1
 		for key, timeValue := timeCursor.Last(); key != nil; key, timeValue = timeCursor.Prev() {
 			if bytes.Compare(timeValue, cutoffBytes) < 0 {
 				break
@@ -91,14 +90,20 @@ func ListCompletedTasks(hours int) error {
 
 			taskBytes := dataBucket.Get(key)
 			if taskBytes != nil {
-				// id := bToU(key)
-				fmt.Printf("%d. %s\n", i, taskBytes)
-				i++
+				var task Task
+
+				id := bToU(key)
+				task.ID = id
+				task.Task = string(taskBytes)
+
+				tasks = append(tasks, task)
 			}
 		}
 
 		return nil
 	})
+
+	return tasks, err
 }
 
 func AddToDOTask(task []byte) error {
